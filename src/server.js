@@ -1,10 +1,9 @@
-globalThis.isSSR = true;
 import fastify from "fastify";
 import serve from "fastify-static";
-import { readFileSync, readJsonSync } from "fs-extra";
 import { resolve, join } from "path";
+import { readFileSync, readJsonSync } from "fs-extra";
 
-import { renderToString, generateHydrationScript } from "solid-js/server";
+import { renderToString, generateHydrationScript } from "solid-js/web";
 
 import { App } from "./app.jsx";
 
@@ -29,7 +28,7 @@ const makePage = ({ body = "", title = "", head = "", scripts = "" }) =>
 app.get("*", async (req, rep) => {
   const eventNames = ["click", "blur", "input"];
   const head = `<script>${generateHydrationScript({ eventNames })}</script>`;
-  const body = renderToString(() => App);
+  const body = renderToString(App);
   const scripts = `<script type="module" src="/public/${manifest["browser.js"]}"></script>`;
 
   rep.type("text/html");
@@ -37,4 +36,4 @@ app.get("*", async (req, rep) => {
   return makePage({ body, head, scripts });
 });
 
-app.listen(3000, console.log);
+app.listen(3042, console.log);

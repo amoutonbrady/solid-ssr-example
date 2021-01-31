@@ -27,7 +27,7 @@ export default [
     ],
     plugins: [
       del({ targets: "build/*" }),
-      nodeResolve({ preferBuiltins: true }),
+      nodeResolve({ preferBuiltins: true, exportConditions: ["server"] }),
       babel({
         babelHelpers: "bundled",
         presets: [["solid", { generate: "ssr", hydratable: true }]],
@@ -47,7 +47,7 @@ export default [
     ],
     preserveEntrySignatures: false,
     plugins: [
-      nodeResolve(),
+      nodeResolve({ exportConditions: ["browser"] }),
       babel({
         babelHelpers: "bundled",
         presets: [["solid", { generate: "dom", hydratable: true }]],
