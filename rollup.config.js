@@ -4,6 +4,7 @@ import babel from "@rollup/plugin-babel";
 import copy from "rollup-plugin-copy";
 import outputManifest from "rollup-plugin-output-manifest";
 import del from "rollup-plugin-delete";
+import { terser } from "rollup-plugin-terser";
 import { resolve } from "path";
 
 export default [
@@ -18,7 +19,7 @@ export default [
     ],
     external: [
       "solid-js",
-      "solid-js/dom",
+      "solid-js/web",
       "fs-extra",
       "path",
       "fastify",
@@ -27,7 +28,7 @@ export default [
     ],
     plugins: [
       del({ targets: "build/*" }),
-      nodeResolve({ preferBuiltins: true, exportConditions: ["server"] }),
+      nodeResolve({ preferBuiltins: true, exportConditions: ["solid"] }),
       babel({
         babelHelpers: "bundled",
         presets: [["solid", { generate: "ssr", hydratable: true }]],
@@ -47,7 +48,7 @@ export default [
     ],
     preserveEntrySignatures: false,
     plugins: [
-      nodeResolve({ exportConditions: ["browser"] }),
+      nodeResolve({ exportConditions: ["solid"] }),
       babel({
         babelHelpers: "bundled",
         presets: [["solid", { generate: "dom", hydratable: true }]],
@@ -64,6 +65,7 @@ export default [
       outputManifest({
         outputPath: resolve(__dirname, "build"),
       }),
+      terser(),
     ],
   },
 ];

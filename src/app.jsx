@@ -1,11 +1,34 @@
-import { createSignal } from "solid-js";
+import { lazy } from "solid-js";
+import { Route, Router, Link } from "solid-app-router";
 
-export const App = () => {
-  const [count, setCount] = createSignal(0);
-
+function Layout() {
   return (
-    <button onClick={() => setCount(count() + 1)}>
-      Hello world {count()}!
-    </button>
+    <>
+      <Link href="/">Home</Link>
+      <Link href="/about">About</Link>
+
+      <hr />
+
+      <Route />
+    </>
   );
-};
+}
+
+const routes = [
+  {
+    path: "/",
+    component: lazy(() => import("./pages/home.jsx")),
+  },
+  {
+    path: "/about",
+    component: lazy(() => import("./pages/about.jsx")),
+  },
+];
+
+export function App(props = {}) {
+  return (
+    <Router routes={routes} initialURL={props.url}>
+      <Layout />
+    </Router>
+  );
+}

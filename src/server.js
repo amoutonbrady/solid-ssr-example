@@ -3,7 +3,7 @@ import serve from "fastify-static";
 import { resolve, join } from "path";
 import { readFileSync, readJsonSync } from "fs-extra";
 
-import { renderToString, generateHydrationScript } from "solid-js/web";
+import { renderToNodeStream } from "solid-js/web";
 
 import { App } from "./app.jsx";
 
@@ -18,22 +18,25 @@ app.register(serve, {
   prefix: "/public/",
 });
 
-const makePage = ({ body = "", title = "", head = "", scripts = "" }) =>
+const makePage = ({ title = "", script = "", client = "" }) =>
   template
     .replace(/{{ TITLE }}/gim, title)
-    .replace(/{{ HEAD }}/gim, head)
-    .replace(/{{ SCRIPTS }}/gim, scripts)
-    .replace(/{{ BODY }}/gim, body);
+    .replace(/{{ HEAD }}/gim, script)
+    .replace(/{{ SCRIPTS }}/gim, client)
+    .split("{{ BODY }}");
 
-app.get("*", async (req, rep) => {
-  const eventNames = ["click", "blur", "input"];
-  const head = `<script>${generateHydrationScript({ eventNames })}</script>`;
-  const body = renderToString(App);
-  const scripts = `<script type="module" src="/public/${manifest["browser.js"]}"></script>`;
+app.get("*", (req, rep) => {
+  const { script, stream } = renderToNodeStream(() => <App url={req.url} />);
+  const client = `<script type="module" src="/public/${manifest["browser.js"]}"></script>`;
 
   rep.type("text/html");
 
-  return makePage({ body, head, scripts });
+  const [start, end] = makePage({ script, client });
+
+  stream.unshift(start);
+  stream.push(end);
+
+  return stream;
 });
 
 app.listen(3042, console.log);
